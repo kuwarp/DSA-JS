@@ -1,16 +1,78 @@
-import React from 'react';
-import { Container, Typography } from '@mui/material';
-import ProductChart from './components/ProductChart';
+import React, { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  Typography,
+  IconButton,
+  Grid,
+  Modal,
+  Box
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-const App = () => {
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 4,
+};
+
+const PostList = ({ posts, onEdit, onDelete }) => {
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const handleOpen = (post) => {
+    setSelectedPost(post);
+    setOpenModal(true);
+  };
+
+  const handleClose = () => {
+    setOpenModal(false);
+    setSelectedPost(null);
+  };
+
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Product Price Chart
-      </Typography>
-      <ProductChart />
-    </Container>
+    <>
+      <Grid container spacing={2}>
+        {posts.map((post) => (
+          <Grid item xs={12} sm={6} key={post.id}>
+            <Card>
+              <CardContent
+                onClick={(e) => {
+                  if (!e.target.closest('button')) {
+                    handleOpen(post);
+                  }
+                }}
+                sx={{ cursor: 'pointer' }}
+              >
+                <Typography variant="h6">{post.title}</Typography>
+                <Typography>{post.body}</Typography>
+                <IconButton onClick={() => onEdit(post)}><EditIcon /></IconButton>
+                <IconButton onClick={() => onDelete(post.id)}><DeleteIcon /></IconButton>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+      <Modal open={openModal} onClose={handleClose}>
+        <Box sx={modalStyle}>
+          {selectedPost && (
+            <>
+              <Typography variant="h6">{selectedPost.title}</Typography>
+              <Typography sx={{ mt: 2 }}>{selectedPost.body}</Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
+    </>
   );
 };
 
-export default App;
+export default PostList;
