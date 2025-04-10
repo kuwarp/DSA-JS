@@ -1,49 +1,55 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Container, Typography } from '@mui/material';
-import PostList from './components/PostList';
-import PostForm from './components/PostForm';
+import { Button, TextField, Box } from '@mui/material';
 
-const App = () => {
-  const [posts, setPosts] = useState([]);
-  const [editingPost, setEditingPost] = useState(null);
+const PostForm = ({ onSubmit, editingPost, setEditingPost }) => {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
+    if (editingPost) {
+      setTitle(editingPost.title);
+      setBody(editingPost.body);
+    }
+  }, [editingPost]);
 
-  const fetchPosts = async () => {
-    const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
-    setPosts(response.data.slice(0, 10));
-  };
-
-  const createPost = async (postData) => {
-    const response = await axios.post('https://jsonplaceholder.typicode.com/posts', postData);
-    setPosts([response.data, ...posts]);
-  };
-
-  const updatePost = async (id, postData) => {
-    const response = await axios.put(`https://jsonplaceholder.typicode.com/posts/${id}`, postData);
-    setPosts(posts.map((post) => (post.id === id ? response.data : post)));
-    setEditingPost(null);
-  };
-
-  const deletePost = async (id) => {
-    await axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
-    setPosts(posts.filter((post) => post.id !== id));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const postData = { title, body };
+    if (editingPost) {
+      onSubmit(editingPost.id, postData);
+    } else {
+      onSubmit(postData);
+    }
+    setTitle('');
+    setBody('');
   };
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>CRUD App with JSONPlaceholder</Typography>
-      <PostForm
-        onSubmit={editingPost ? updatePost : createPost}
-        editingPost={editingPost}
-        setEditingPost={setEditingPost}
+    <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3 }}>
+      <TextField
+        label="Title"
+        fullWidth
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        sx={{ mb: 2 }}
       />
-      <PostList posts={posts} onEdit={setEditingPost} onDelete={deletePost} />
-    </Container>
+      <TextField
+        label="Body"
+        fullWidth
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        sx={{ mb: 2 }}
+      />
+      <Button type="submit" variant="contained" color="primary">
+        {editingPost ? 'Update Post' : 'Create Post'}
+      </Button>
+      {editingPost && (
+        <Button onClick={() => setEditingPost(null)} sx={{ ml: 2 }}>
+          Cancel
+        </Button>
+      )}
+    </Box>
   );
 };
 
-export default App;
+export default PostForm;
