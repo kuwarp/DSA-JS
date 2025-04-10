@@ -1,37 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { Typography, CircularProgress, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+// ...
 
-const SinglePost = () => {
-  const { id } = useParams();
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`);
-        setPost(response.data);
-      } catch (err) {
-        console.error('Error fetching post:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPost();
-  }, [id]);
-
-  if (loading) return <CircularProgress />;
-
-  if (!post) return <Typography>Post not found</Typography>;
+const PostList = ({ posts, onEdit, onDelete }) => {
+  const navigate = useNavigate();
 
   return (
-    <Box sx={{ mt: 3 }}>
-      <Typography variant="h5">{post.title}</Typography>
-      <Typography variant="body1" sx={{ mt: 2 }}>{post.body}</Typography>
-    </Box>
+    <Grid container spacing={2}>
+      {posts.map((post) => (
+        <Grid item xs={12} sm={6} key={post.id}>
+          <Card>
+            <CardContent
+              onClick={(e) => {
+                if (!e.target.closest('button')) {
+                  navigate(`/posts/${post.id}`);
+                }
+              }}
+              sx={{ cursor: 'pointer' }}
+            >
+              <Typography variant="h6">{post.title}</Typography>
+              <Typography>{post.body}</Typography>
+              <IconButton onClick={() => onEdit(post)}><EditIcon /></IconButton>
+              <IconButton onClick={() => onDelete(post.id)}><DeleteIcon /></IconButton>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
+    </Grid>
   );
 };
-
-export default SinglePost;
