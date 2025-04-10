@@ -1,51 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from 'recharts';
-import { Button, CircularProgress, Box } from '@mui/material';
+import React from 'react';
+import { Container, Typography } from '@mui/material';
+import ProductChart from './components/ProductChart';
 
-const ProductChart = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchProductData = async () => {
-    setLoading(true);
-    const response = await axios.get('https://dummyjson.com/products');
-    const products = response.data.products.slice(0, 10).map(product => ({
-      name: product.title,
-      price: product.price,
-    }));
-    setData(products);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchProductData();
-  }, []);
-
+const App = () => {
   return (
-    <Box>
-      {loading ? (
-        <CircularProgress />
-      ) : (
-        <>
-          <ResponsiveContainer width="100%" height={400}>
-            <BarChart data={data} margin={{ top: 10, right: 30, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" angle={-30} textAnchor="end" interval={0} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="price" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-          <Button onClick={fetchProductData} variant="contained" sx={{ mt: 2 }}>
-            Refresh Data
-          </Button>
-        </>
-      )}
-    </Box>
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        Product Price Chart
+      </Typography>
+      <ProductChart />
+    </Container>
   );
 };
 
-export default ProductChart;
+export default App;
