@@ -1,0 +1,49 @@
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Container, Typography } from '@mui/material';
+import PostList from './components/PostList';
+import PostForm from './components/PostForm';
+
+const App = () => {
+  const [posts, setPosts] = useState([]);
+  const [editingPost, setEditingPost] = useState(null);
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
+    setPosts(response.data.slice(0, 10));
+  };
+
+  const createPost = async (postData) => {
+    const response = await axios.post('https://jsonplaceholder.typicode.com/posts', postData);
+    setPosts([response.data, ...posts]);
+  };
+
+  const updatePost = async (id, postData) => {
+    const response = await axios.put(`https://jsonplaceholder.typicode.com/posts/${id}`, postData);
+    setPosts(posts.map((post) => (post.id === id ? response.data : post)));
+    setEditingPost(null);
+  };
+
+  const deletePost = async (id) => {
+    await axios.delete(`https://jsonplaceholder.typicode.com/posts/${id}`);
+    setPosts(posts.filter((post) => post.id !== id));
+  };
+
+  return (
+    <Container>
+      <Typography variant="h4" gutterBottom>CRUD App with JSONPlaceholder</Typography>
+      <PostForm
+        onSubmit={editingPost ? updatePost : createPost}
+        editingPost={editingPost}
+        setEditingPost={setEditingPost}
+      />
+      <PostList posts={posts} onEdit={setEditingPost} onDelete={deletePost} />
+    </Container>
+  );
+};
+
+export default App;
