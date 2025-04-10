@@ -1,55 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { Button, TextField, Box } from '@mui/material';
+import React from 'react';
+import { Card, CardContent, Typography, IconButton, Grid } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
-const PostForm = ({ onSubmit, editingPost, setEditingPost }) => {
-  const [title, setTitle] = useState('');
-  const [body, setBody] = useState('');
+const PostList = ({ posts, onEdit, onDelete }) => (
+  <Grid container spacing={2}>
+    {posts.map((post) => (
+      <Grid item xs={12} sm={6} key={post.id}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">{post.title}</Typography>
+            <Typography>{post.body}</Typography>
+            <IconButton onClick={() => onEdit(post)}><EditIcon /></IconButton>
+            <IconButton onClick={() => onDelete(post.id)}><DeleteIcon /></IconButton>
+          </CardContent>
+        </Card>
+      </Grid>
+    ))}
+  </Grid>
+);
 
-  useEffect(() => {
-    if (editingPost) {
-      setTitle(editingPost.title);
-      setBody(editingPost.body);
-    }
-  }, [editingPost]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const postData = { title, body };
-    if (editingPost) {
-      onSubmit(editingPost.id, postData);
-    } else {
-      onSubmit(postData);
-    }
-    setTitle('');
-    setBody('');
-  };
-
-  return (
-    <Box component="form" onSubmit={handleSubmit} sx={{ mb: 3 }}>
-      <TextField
-        label="Title"
-        fullWidth
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        sx={{ mb: 2 }}
-      />
-      <TextField
-        label="Body"
-        fullWidth
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        sx={{ mb: 2 }}
-      />
-      <Button type="submit" variant="contained" color="primary">
-        {editingPost ? 'Update Post' : 'Create Post'}
-      </Button>
-      {editingPost && (
-        <Button onClick={() => setEditingPost(null)} sx={{ ml: 2 }}>
-          Cancel
-        </Button>
-      )}
-    </Box>
-  );
-};
-
-export default PostForm;
+export default PostList;
