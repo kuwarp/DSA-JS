@@ -1,78 +1,37 @@
-import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  IconButton,
-  Grid,
-  Modal,
-  Box
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { Typography, CircularProgress, Box } from '@mui/material';
 
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  borderRadius: 2,
-  boxShadow: 24,
-  p: 4,
-};
+const SinglePost = () => {
+  const { id } = useParams();
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-const PostList = ({ posts, onEdit, onDelete }) => {
-  const [openModal, setOpenModal] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${id}`);
+        setPost(response.data);
+      } catch (err) {
+        console.error('Error fetching post:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPost();
+  }, [id]);
 
-  const handleOpen = (post) => {
-    setSelectedPost(post);
-    setOpenModal(true);
-  };
+  if (loading) return <CircularProgress />;
 
-  const handleClose = () => {
-    setOpenModal(false);
-    setSelectedPost(null);
-  };
+  if (!post) return <Typography>Post not found</Typography>;
 
   return (
-    <>
-      <Grid container spacing={2}>
-        {posts.map((post) => (
-          <Grid item xs={12} sm={6} key={post.id}>
-            <Card>
-              <CardContent
-                onClick={(e) => {
-                  if (!e.target.closest('button')) {
-                    handleOpen(post);
-                  }
-                }}
-                sx={{ cursor: 'pointer' }}
-              >
-                <Typography variant="h6">{post.title}</Typography>
-                <Typography>{post.body}</Typography>
-                <IconButton onClick={() => onEdit(post)}><EditIcon /></IconButton>
-                <IconButton onClick={() => onDelete(post.id)}><DeleteIcon /></IconButton>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-
-      <Modal open={openModal} onClose={handleClose}>
-        <Box sx={modalStyle}>
-          {selectedPost && (
-            <>
-              <Typography variant="h6">{selectedPost.title}</Typography>
-              <Typography sx={{ mt: 2 }}>{selectedPost.body}</Typography>
-            </>
-          )}
-        </Box>
-      </Modal>
-    </>
+    <Box sx={{ mt: 3 }}>
+      <Typography variant="h5">{post.title}</Typography>
+      <Typography variant="body1" sx={{ mt: 2 }}>{post.body}</Typography>
+    </Box>
   );
 };
 
-export default PostList;
+export default SinglePost;
